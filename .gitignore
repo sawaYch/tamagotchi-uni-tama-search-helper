@@ -4,7 +4,10 @@ dependencies.lock
 sdkconfig
 sdkconfig.old
 .cache/
-scripts/.cache/
+!scripts/.cache/
+scripts/.cache/*
+!scripts/.cache/sprites/
+!scripts/.cache/sprites/**
 __pycache__/
 *.pyc
 
