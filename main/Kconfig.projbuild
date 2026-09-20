@@ -1,0 +1,11 @@
+menu "Tama Search Helper"
+
+    config TAMA_WIFI_CHANNEL
+        int "WiFi Channel"
+        range 1 13
+        default 1
+        help
+            2.4 GHz channel for the Tama Search SoftAP. Tamagotchi Uni
+            only needs to see beacons; it does not join the network.
+
+endmenu

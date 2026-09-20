@@ -1,0 +1,26 @@
+CompileFlags:
+  CompilationDatabase: build
+  BuiltinHeaders: QueryDriver
+  Add:
+    - -isystem
+    - C:/Espressif/tools/xtensa-esp-elf/esp-15.2.0_20251204/xtensa-esp-elf/picolibc/include
+    - -isystem
+    - C:/Espressif/tools/xtensa-esp-elf/esp-15.2.0_20251204/xtensa-esp-elf/lib/gcc/xtensa-esp-elf/15.2.0/include
+    - -isystem
+    - C:/Espressif/tools/xtensa-esp-elf/esp-15.2.0_20251204/xtensa-esp-elf/lib/gcc/xtensa-esp-elf/15.2.0/include-fixed
+    - -isystem
+    - C:/Espressif/tools/xtensa-esp-elf/esp-15.2.0_20251204/xtensa-esp-elf/xtensa-esp-elf/include
+  Remove:
+    - -fno-tree-switch-conversion
+    - -fstrict-volatile-bitfields
+    - -fno-shrink-wrap
+    - -fno-jump-tables
+    - -fzero-call-used-regs=*
+    - -fzero-init-padding-bits=*
+    - -fno-malloc-dce
+    - -fmacro-prefix-map=*
+    - -mdynconfig=*
+
+Diagnostics:
+  UnusedIncludes: None
+  MissingIncludes: None

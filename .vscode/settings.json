@@ -1,0 +1,45 @@
+{
+  "idf.customExtraVars": {
+    "IDF_PATH": "C:\\esp\\v6.1\\esp-idf",
+    "IDF_TOOLS_PATH": "C:\\Espressif\\tools",
+    "ESP_IDF_MONITOR_NO_RESET": "1"
+  },
+  "idf.currentSetup": "C:\\esp\\v6.1\\esp-idf",
+  "idf.toolsPathWin": "C:\\Espressif\\tools",
+  "idf.pythonBinPathWin": "C:\\Espressif\\tools\\python\\v6.1\\venv\\Scripts\\python.exe",
+  "idf.openOcdConfigs": [
+    "board/esp32s3-builtin.cfg"
+  ],
+  "idf.flashType": "UART",
+  "idf.portWin": "COM5",
+  "idf.adapterTargetName": "esp32s3",
+  "terminal.integrated.env.windows": {
+    "IDF_PATH": "C:\\esp\\v6.1\\esp-idf",
+    "IDF_TOOLS_PATH": "C:\\Espressif\\tools",
+    "IDF_PYTHON_ENV_PATH": "C:\\Espressif\\tools\\python\\v6.1\\venv",
+    "OPENOCD_SCRIPTS": "C:\\Espressif\\tools\\openocd-esp32\\v0.12.0-esp32-20260703\\openocd-esp32\\share\\openocd\\scripts",
+    "ESP_ROM_ELF_DIR": "C:\\Espressif\\tools\\esp-rom-elfs\\20241011\\",
+    "IDF_CCACHE_ENABLE": "1",
+    "ESP_IDF_MONITOR_NO_RESET": "1"
+  },
+  "terminal.integrated.profiles.windows": {
+    "ESP-IDF PowerShell": {
+      "source": "PowerShell",
+      "args": [
+        "-NoExit",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "C:\\Espressif\\tools\\Microsoft.v6.1.PowerShell_profile.ps1"
+      ],
+      "icon": "circuit-board"
+    }
+  },
+  "clangd.path": "C:\\Espressif\\tools\\esp-clangd\\esp-21.1.3_20260408\\esp-clangd\\bin\\clangd.exe",
+  "clangd.arguments": [
+    "--background-index",
+    "--query-driver=C:/Espressif/tools/xtensa-esp-elf/**/xtensa-esp32s3-elf-gcc*.exe",
+    "--compile-commands-dir=${workspaceFolder}/build"
+  ],
+  "C_Cpp.intelliSenseEngine": "disabled"
+}
