@@ -1,6 +1,7 @@
 #include "tama_ui.h"
 
 #include "tama_ap.h"
+#include "tama_battery.h"
 #include "tama_catalog.h"
 
 #include "esp_err.h"
@@ -17,11 +18,16 @@ static const char *TAG = "tama_ui";
 #define COLOR_TEXT 0xFFF8E7
 #define COLOR_MUTED 0xC9B48A
 #define COLOR_GREEN 0x66BB6A
+#define COLOR_YELLOW 0xE6C35C
+#define COLOR_RED 0xEF5350
 #define ITEM_WIDTH 184
 #define NAME_HEIGHT 20
 #define HEADER_HEIGHT 48
+#define HEADER_STATUS_WIDTH 240
+#define BATTERY_REFRESH_MS 2000
 
 static lv_obj_t *s_status;
+static lv_obj_t *s_battery;
 static lv_obj_t **s_items;
 static int s_active = -1;
 
@@ -49,6 +55,39 @@ static void refresh_status(void) {
   char buf[64];
   snprintf(buf, sizeof(buf), "On: %s", tama_characters[s_active].name);
   lv_label_set_text(s_status, buf);
+}
+
+static void refresh_battery(void) {
+  if (s_battery == NULL) {
+    return;
+  }
+
+  tama_battery_info_t info;
+  if (!tama_battery_read(&info) || !info.connected || info.percent < 0) {
+    lv_label_set_text(s_battery, "--%");
+    lv_obj_set_style_text_color(s_battery, lv_color_hex(COLOR_MUTED),
+                                LV_PART_MAIN);
+    return;
+  }
+
+  char buf[16];
+  snprintf(buf, sizeof(buf), "%d%%", info.percent);
+  lv_label_set_text(s_battery, buf);
+
+  uint32_t color = COLOR_TEXT;
+  if (info.charging) {
+    color = COLOR_GREEN;
+  } else if (info.percent <= 15) {
+    color = COLOR_RED;
+  } else if (info.percent <= 30) {
+    color = COLOR_YELLOW;
+  }
+  lv_obj_set_style_text_color(s_battery, lv_color_hex(color), LV_PART_MAIN);
+}
+
+static void on_battery_timer(lv_timer_t *timer) {
+  (void)timer;
+  refresh_battery();
 }
 
 static void set_active_index(int index) {
@@ -157,18 +196,27 @@ void tama_ui_create(void) {
   lv_obj_set_size(header, lv_pct(100), HEADER_HEIGHT);
   lv_obj_set_style_bg_color(header, lv_color_hex(COLOR_PANEL), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(header, LV_OPA_COVER, LV_PART_MAIN);
-  lv_obj_set_flex_flow(header, LV_FLEX_FLOW_COLUMN);
-  lv_obj_set_flex_align(header, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER,
-                        LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_style_pad_hor(header, 12, LV_PART_MAIN);
   lv_obj_set_scrollable(header, false);
 
   s_status = lv_label_create(header);
   lv_label_set_long_mode(s_status, LV_LABEL_LONG_CLIP);
-  lv_obj_set_width(s_status, 352);
+  lv_obj_set_width(s_status, HEADER_STATUS_WIDTH);
   lv_obj_set_style_text_align(s_status, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   lv_obj_set_style_text_color(s_status, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
   lv_obj_set_style_text_font(s_status, &lv_font_montserrat_18, LV_PART_MAIN);
+  lv_obj_align(s_status, LV_ALIGN_CENTER, 0, 0);
   refresh_status();
+
+  s_battery = lv_label_create(header);
+  lv_obj_set_style_text_align(s_battery, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
+  lv_obj_set_style_text_font(s_battery, &lv_font_montserrat_14, LV_PART_MAIN);
+  lv_obj_align(s_battery, LV_ALIGN_RIGHT_MID, 0, 0);
+  if (tama_battery_init() != ESP_OK) {
+    ESP_LOGW(TAG, "Battery monitor unavailable");
+  }
+  refresh_battery();
+  lv_timer_create(on_battery_timer, BATTERY_REFRESH_MS, NULL);
 
   lv_obj_t *list = lv_obj_create(screen);
   lv_obj_remove_style_all(list);

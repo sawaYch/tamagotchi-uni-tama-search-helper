@@ -1,9 +1,10 @@
-file(GLOB TAMA_GENERATED_SRCS "${CMAKE_CURRENT_LIST_DIR}/generated/*.c")
+file(GLOB TAMA_GENERATED_SRCS "tama_battery.c" "${CMAKE_CURRENT_LIST_DIR}/generated/*.c")
 
 idf_component_register(
     SRCS
         "main.c"
         "tama_ap.c"
+        "tama_battery.c"
         "tama_ui.c"
         "tama_catalog.c"
         ${TAMA_GENERATED_SRCS}
@@ -14,6 +15,7 @@ idf_component_register(
         "generated/tama_sprites.bin"
     REQUIRES
         esp32_s3_touch_amoled_1_8
+        esp_driver_i2c
         esp_wifi
         nvs_flash
         esp_event
