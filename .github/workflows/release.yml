@@ -1,0 +1,76 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Build firmware
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: v5.5.5
+          target: esp32s3
+          command: idf.py build merge-bin
+
+      - name: Package binaries
+        id: package
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            VERSION="${{ github.ref_name }}"
+          else
+            VERSION="${GITHUB_SHA::7}"
+          fi
+
+          mkdir -p dist
+          cp build/tama_search_helper.bin "dist/tama_search_helper-${VERSION}.bin"
+          cp build/bootloader/bootloader.bin "dist/tama_search_helper-${VERSION}-bootloader.bin"
+          cp build/partition_table/partition-table.bin "dist/tama_search_helper-${VERSION}-partition-table.bin"
+          cp build/merged-binary.bin "dist/tama_search_helper-${VERSION}-merged.bin"
+
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          ls -lh dist
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tama-search-helper-${{ steps.package.outputs.version }}
+          path: dist/*
+
+      - name: Create GitHub Release
+        if: github.ref_type == 'tag'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.package.outputs.version }}"
+          {
+            echo "Prebuilt firmware for the Waveshare ESP32-S3-Touch-AMOLED-1.8."
+            echo
+            echo "Flash the merged binary at offset \`0x0\`:"
+            echo
+            echo '```bash'
+            echo "esptool.py --chip esp32s3 -p PORT write_flash 0x0 tama_search_helper-${VERSION}-merged.bin"
+            echo '```'
+            echo
+            echo "Replace \`PORT\` with \`COMx\` on Windows or \`/dev/ttyACM0\` on Linux/macOS."
+          } > "$RUNNER_TEMP/notes.md"
+
+          gh release create "$VERSION" dist/* \
+            --generate-notes \
+            --title "Tama Search Helper ${VERSION}" \
+            --notes "$(cat "$RUNNER_TEMP/notes.md")"
