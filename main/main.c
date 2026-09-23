@@ -53,14 +53,22 @@ void app_main(void) {
     ESP_LOGE(TAG, "Display initialization failed");
     abort();
   }
-  ESP_ERROR_CHECK(bsp_display_brightness_set(80));
+
+  // CO5300 comes out of reset showing its GRAM: a white field and a green
+  // strip on the right (the 16px column gap is applied only after the panel
+  // is already on). Keep brightness at 0 until the real UI has been flushed.
+  ESP_ERROR_CHECK(bsp_display_brightness_set(0));
 
   if (bsp_display_lock(1000)) {
     tama_ui_create();
+    lv_obj_invalidate(lv_screen_active());
+    lv_refr_now(display);
     bsp_display_unlock();
   } else {
     ESP_LOGE(TAG, "Could not lock LVGL to create UI");
   }
+
+  ESP_ERROR_CHECK(bsp_display_brightness_set(80));
 
   ESP_LOGI(TAG, "Tama Search helper ready (%u characters)",
            (unsigned)tama_character_count);

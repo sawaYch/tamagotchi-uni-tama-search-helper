@@ -11,7 +11,6 @@
     "board/esp32s3-builtin.cfg"
   ],
   "idf.flashType": "UART",
-  "idf.portWin": "COM5",
   "idf.adapterTargetName": "esp32s3",
   "terminal.integrated.env.windows": {
     "IDF_PATH": "C:\\esp\\v6.1\\esp-idf",
@@ -41,5 +40,6 @@
     "--query-driver=C:/Espressif/tools/xtensa-esp-elf/**/xtensa-esp32s3-elf-gcc*.exe",
     "--compile-commands-dir=${workspaceFolder}/build"
   ],
-  "C_Cpp.intelliSenseEngine": "disabled"
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "idf.port": "COM5"
 }
