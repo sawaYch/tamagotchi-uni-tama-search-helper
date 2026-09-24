@@ -25,11 +25,14 @@ static const char *TAG = "tama_ui";
 #define HEADER_HEIGHT 48
 #define HEADER_STATUS_WIDTH 240
 #define BATTERY_REFRESH_MS 2000
+#define DOUBLE_TAP_MS 400
 
 static lv_obj_t *s_status;
 static lv_obj_t *s_battery;
 static lv_obj_t **s_items;
 static int s_active = -1;
+static int s_tap_index = -1;
+static uint32_t s_tap_tick;
 
 static lv_obj_t *item_name(lv_obj_t *item) {
   return lv_obj_get_child_by_type(item, 0, &lv_label_class);
@@ -104,13 +107,23 @@ static void set_active_index(int index) {
 }
 
 static void on_item_clicked(lv_event_t *event) {
-  if (lv_event_get_code(event) != LV_EVENT_DOUBLE_CLICKED) {
+  if (lv_event_get_code(event) != LV_EVENT_SHORT_CLICKED) {
     return;
   }
   const size_t index = (size_t)(uintptr_t)lv_event_get_user_data(event);
   if (index >= tama_character_count) {
     return;
   }
+
+  const uint32_t now = lv_tick_get();
+  const bool double_tap =
+      s_tap_index == (int)index && lv_tick_elaps(s_tap_tick) <= DOUBLE_TAP_MS;
+  s_tap_index = (int)index;
+  s_tap_tick = now;
+  if (!double_tap) {
+    return;
+  }
+  s_tap_index = -1;
 
   esp_err_t err = ESP_OK;
   int next = -1;
@@ -154,7 +167,7 @@ static void add_character_item(lv_obj_t *parent, size_t index) {
   lv_obj_set_style_bg_opa(item, LV_OPA_TRANSP, LV_PART_MAIN);
   lv_obj_set_scrollable(item, false);
   lv_obj_set_clickable(item, true);
-  lv_obj_add_event_cb(item, on_item_clicked, LV_EVENT_DOUBLE_CLICKED,
+  lv_obj_add_event_cb(item, on_item_clicked, LV_EVENT_SHORT_CLICKED,
                       (void *)(uintptr_t)index);
   s_items[index] = item;
 
