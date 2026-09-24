@@ -5,11 +5,14 @@
 #include "freertos/task.h"
 #include "nvs_flash.h"
 #include "tama_ap.h"
+#include "tama_battery.h"
 #include "tama_catalog.h"
 #include "tama_ui.h"
 
 static const char *TAG = "tama_search";
 
+// V2: panel reset sits behind TCA9554. Same sequence as Waveshare issue #12 /
+// Xiaozhi factory bring-up; must run before bsp_display_start() SPI init.
 static void board_v2_release_panel_reset(void) {
   ESP_ERROR_CHECK(bsp_i2c_init());
   esp_io_expander_handle_t expander = bsp_io_expander_init();
@@ -47,17 +50,18 @@ void app_main(void) {
   tama_catalog_init();
   ESP_ERROR_CHECK(tama_ap_init());
 
+  if (tama_battery_init() != ESP_OK) {
+    ESP_LOGW(TAG, "AXP2101 init failed; continuing without PMU setup");
+  }
   board_v2_release_panel_reset();
+
+  // Official ESP-IDF quickstart order, with Arduino V2 brightness timing:
+  // start dark → draw first frame → then raise brightness.
   lv_display_t *display = bsp_display_start();
   if (display == NULL) {
     ESP_LOGE(TAG, "Display initialization failed");
     abort();
   }
-
-  // CO5300 comes out of reset showing its GRAM: a white field and a green
-  // strip on the right (the 16px column gap is applied only after the panel
-  // is already on). Keep brightness at 0 until the real UI has been flushed.
-  ESP_ERROR_CHECK(bsp_display_brightness_set(0));
 
   if (bsp_display_lock(1000)) {
     tama_ui_create();
