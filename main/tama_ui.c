@@ -13,10 +13,10 @@
 
 static const char *TAG = "tama_ui";
 
-#define COLOR_BG 0x1A1208
-#define COLOR_PANEL 0x2A1C10
-#define COLOR_TEXT 0xFFF8E7
-#define COLOR_MUTED 0xC9B48A
+#define COLOR_BG 0x000000
+#define COLOR_PANEL 0x000000
+#define COLOR_TEXT 0xFFFFFF
+#define COLOR_MUTED 0x9E9E9E
 #define COLOR_GREEN 0x66BB6A
 #define COLOR_YELLOW 0xE6C35C
 #define COLOR_RED 0xEF5350
@@ -199,6 +199,7 @@ void tama_ui_create(void) {
 
   lv_obj_t *screen = lv_screen_active();
   lv_obj_set_style_bg_color(screen, lv_color_hex(COLOR_BG), LV_PART_MAIN);
+  lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, LV_PART_MAIN);
   lv_obj_set_flex_flow(screen, LV_FLEX_FLOW_COLUMN);
   lv_obj_set_style_pad_all(screen, 0, LV_PART_MAIN);
   lv_obj_set_style_pad_row(screen, 0, LV_PART_MAIN);
